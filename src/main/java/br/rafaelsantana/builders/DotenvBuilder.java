@@ -8,7 +8,7 @@ public class DotenvBuilder {
 
     public static Dotenv build() {
         if (instance == null) {
-            instance = Dotenv.configure().load();
+            instance = Dotenv.load();
         }
         return instance;
     }

@@ -1,6 +1,6 @@
 package br.rafaelsantana.builders;
 
-import io.github.cdimascio.dotenv.Dotenv;
+import br.rafaelsantana.AppConfig;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -10,13 +10,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitBuilder {
 
-    private final static Dotenv ENV = DotenvBuilder.build();
     private final static String BASE_URL = "http://api.ipstack.com/";
-    private final static String API_KEY = ENV.get("API_KEY");
-    private static Retrofit instance;
+    private final static String API_KEY = AppConfig.API_KEY;
 
-    public final static Integer DEFAULT_TIMEOUT = ENV.get("DEFAULT_TIMEOUT") != null ?
-            Integer.parseInt(ENV.get("DEFAULT_TIMEOUT")) : 15000;
+    private static Retrofit instance;
 
     public static Retrofit build() {
         if (instance == null) {
