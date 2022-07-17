@@ -1,12 +1,14 @@
 package br.rafaelsantana.builders;
 
 import br.rafaelsantana.AppConfig;
-import okhttp3.Headers;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
+import okhttp3.*;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 public class RetrofitBuilder {
 
@@ -26,8 +28,26 @@ public class RetrofitBuilder {
         return instance;
     }
 
+    private static File getCacheFile() {
+        URL url = RetrofitBuilder.class.getClassLoader().getResource("httpCache/");
+        File file = null;
+        if (url != null) {
+            try {
+                file = new File(url.toURI());
+            } catch (URISyntaxException e) {
+                file = new File(url.getPath());
+            }
+        }
+        return file;
+    }
+
     private static OkHttpClient clientWithApiKeyAndHeaders() {
+        File httpCacheDirectory = getCacheFile();
+        int cacheSize = AppConfig.DEFAULT_CACHE_MAX_SIZE;
+        Cache cache = new Cache(httpCacheDirectory, cacheSize);
+
         return new OkHttpClient.Builder()
+                .connectTimeout(AppConfig.DEFAULT_TIMEOUT_REQUESTS, TimeUnit.MILLISECONDS)
                 .addInterceptor(chain -> {
                     Request originalRequest = chain.request();
 
@@ -50,6 +70,21 @@ public class RetrofitBuilder {
                             .build();
 
                     return chain.proceed(request);
-                }).build();
+                })
+                .addNetworkInterceptor(chain -> {
+                    Response response = chain.proceed(chain.request());
+
+                    CacheControl cacheControl = new CacheControl.Builder()
+                            .maxAge(AppConfig.DEFAULT_CACHE_MAX_AGE, TimeUnit.SECONDS)
+                            .build();
+
+                    return response.newBuilder()
+                            .removeHeader("Pragma")
+                            .removeHeader("Cache-Control")
+                            .header("Cache-Control", cacheControl.toString())
+                            .build();
+                })
+                .cache(cache)
+                .build();
     }
 }

@@ -6,33 +6,48 @@ import br.rafaelsantana.model.IPStack;
 import br.rafaelsantana.services.IPStackService;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
+import java.time.Instant;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 public class Main {
 
     public static void main(String[] args) {
+        Map<String, Map<String, IPStack>> inputHistory = new HashMap<>();
         IPStackService.IPStackClient client = IPStackService.buildClient();
 
         try (MyKafkaConsumer<IPStack> consumer
-                     = new MyKafkaConsumer<IPStack>(AppConfig.INPUT_TOPIC, IPStack.class.getName())) {
+                     = new MyKafkaConsumer<IPStack>(AppConfig.INPUT_TOPIC, IPStack.class.getName());
+             MyKafkaProducer<IPStack> producer = new MyKafkaProducer<IPStack>()) {
             consumer.subscribe((record) -> {
                 IPStack inputStack = record.value();
-
-                try {
-                    IPStack response = client
-                            .getIpInformation(inputStack.ip)
-                            .get(AppConfig.DEFAULT_TIMEOUT_REQUESTS, TimeUnit.MILLISECONDS);
-                    inputStack.completeWithApiResponse(response);
-                } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                    // TODO use logs
-                    System.err.printf("Error while making request: %s\nError: %s", inputStack, e);
+                if (inputStack == null) {
+                    return;
                 }
 
-                try (MyKafkaProducer<IPStack> producer = new MyKafkaProducer<IPStack>()) {
-                    producer.sendRecord(
-                            new ProducerRecord<>(AppConfig.OUTPUT_TOPIC, AppConfig.CLIENT_ID_CONFIG, inputStack));
+                String clientId = inputStack.clientId;
+                String ip = inputStack.ip;
+
+                if (!inputHistory.containsKey(clientId)) {
+                    inputHistory.put(clientId, new HashMap<>());
+                }
+
+                IPStack lastRecord = inputHistory.get(clientId).get(ip);
+                boolean stale = lastRecord == null ||
+                        Instant.now().getEpochSecond() - lastRecord.timeStamp > AppConfig.DEFAULT_CACHE_MAX_AGE;
+                if (stale) {
+                    try {
+                        IPStack response = client.getIpInformation(ip).get();
+                        inputStack.completeWithApiResponse(response);
+
+                        producer.sendRecord(
+                                new ProducerRecord<>(AppConfig.OUTPUT_TOPIC, AppConfig.CLIENT_ID_CONFIG, inputStack));
+
+                        inputHistory.get(clientId).put(ip, inputStack);
+                    } catch (InterruptedException | ExecutionException e) {
+                        // TODO use logs
+                        System.err.printf("Error while making request: %s\nError: %s", inputStack, e);
+                    }
                 }
             });
         }
