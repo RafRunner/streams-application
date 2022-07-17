@@ -2,12 +2,14 @@ package br.rafaelsantana.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.time.Instant;
+
 public class IPStack {
 
     @SerializedName("client_id")
     public final String clientId;
     @SerializedName("time_stamp")
-    public final Long timeStamp;
+    public Long timeStamp;
     @SerializedName("ip")
     public final String ip;
     @SerializedName("latitude")
@@ -45,6 +47,7 @@ public class IPStack {
         this.country = apiResponse.country;
         this.region = apiResponse.region;
         this.city = apiResponse.city;
+        this.timeStamp = Instant.now().getEpochSecond();
     }
 
     @Override
