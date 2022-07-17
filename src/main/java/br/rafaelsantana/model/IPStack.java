@@ -4,25 +4,33 @@ import com.google.gson.annotations.SerializedName;
 
 public class IPStack {
 
+    @SerializedName("client_id")
+    public final String clientId;
+    @SerializedName("time_stamp")
+    public final Long timeStamp;
     @SerializedName("ip")
     public final String ip;
     @SerializedName("latitude")
-    public final Float latitude;
+    public Float latitude;
     @SerializedName("longitude")
-    public final Float longitude;
+    public Float longitude;
     @SerializedName("country_name")
-    public final String country;
+    public String country;
     @SerializedName("region_name")
-    public final String region;
+    public String region;
     @SerializedName("city")
-    public final String city;
+    public String city;
 
-    public IPStack(String ip,
+    public IPStack(String clientId,
+                   Long timeStamp,
+                   String ip,
                    Float latitude,
                    Float longitude,
                    String country,
                    String region,
                    String city) {
+        this.clientId = clientId;
+        this.timeStamp = timeStamp;
         this.ip = ip;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -31,10 +39,20 @@ public class IPStack {
         this.city = city;
     }
 
+    public void completeWithApiResponse(IPStack apiResponse) {
+        this.latitude = apiResponse.latitude;
+        this.longitude = apiResponse.longitude;
+        this.country = apiResponse.country;
+        this.region = apiResponse.region;
+        this.city = apiResponse.city;
+    }
+
     @Override
     public String toString() {
         return "IPStack{" +
-                "ip='" + ip + '\'' +
+                "clientId='" + clientId + '\'' +
+                ", timeStamp=" + timeStamp +
+                ", ip='" + ip + '\'' +
                 ", latitude=" + latitude +
                 ", longitude=" + longitude +
                 ", country='" + country + '\'' +
