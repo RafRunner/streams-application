@@ -25,6 +25,16 @@ The geolocation information is gathered using the [IPStack](https://ipstack.com/
 
 ## How to run
 
-First, create a .env and a docker.env (if you intend on running the main application on docker) on the project root files with the necessary configuration (the only ones with no default and needs to be present are API_KEY with your IPStack API key on both files and BOOTSTRAP_SERVERS_CONFIG=//kafka:9092 on the docker.env file so the application can communicate with the kafka container when running with docker) build the application running the gradle task `fatJar` with `./gradlew fatJar` in a linux environment with jdk17+, then run `docker compose up` to download the necessary images and run all containers. Now you can send messages to the input topic from a different producer and consume the processed messages from the output topic in a different consumer assuming they're connected to the kafka broker. Note: the application won't respond to the same client with the same ip for 30 minutes (configurable in the .env file with the key DEFAULT_CACHE_MAX_AGE in seconds).
+- Create a .env and a docker.env (if you intend on running the main application on docker) on the project root files with the necessary configuration (the only ones with no default and needs to be present are `API_KEY` with your IPStack API key on both files and `BOOTSTRAP_SERVERS_CONFIG=//kafka:9092` on the docker.env file so the application can communicate with the kafka container when running with docker);
+
+
+- Build the application running the gradle task `fatJar` with `./gradlew fatJar` on Linux/macOS or `gradlew fatJar` on Windows with jdk17+;
+
+
+- Run `docker compose up` to download the necessary images and run all containers.;
+
+Now you can send messages to the input topic from a different producer and consume the processed messages from the output topic in a different consumer assuming they're connected to the same kafka broker.
+
+Note: the application won't respond to the same client with the same ip for 30 minutes, this is configurable in the .env files with the key DEFAULT_CACHE_MAX_AGE and the value in seconds.
 
 Made by: Rafael Nunes Santana, July 2022
