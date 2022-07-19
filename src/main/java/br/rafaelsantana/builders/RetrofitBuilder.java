@@ -30,13 +30,13 @@ public class RetrofitBuilder {
 
     private static File getCacheFile() {
         URL url = RetrofitBuilder.class.getClassLoader().getResource("httpCache/");
-        File file = null;
-        if (url != null) {
-            try {
-                file = new File(url.toURI());
-            } catch (URISyntaxException e) {
-                file = new File(url.getPath());
-            }
+        File file;
+        try {
+            // We're in develop mode
+            file = new File(url.toURI());
+        } catch (Exception e) {
+            // Production mode
+            file = new File("./main/httpCache/");
         }
         return file;
     }
