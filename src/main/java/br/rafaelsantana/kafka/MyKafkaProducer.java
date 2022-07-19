@@ -22,8 +22,8 @@ public class MyKafkaProducer<T> implements Closeable {
 
     public MyKafkaProducer() {
         Properties props = new Properties();
-        props.put(ProducerConfig.CLIENT_ID_CONFIG, "streams-application");
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(ProducerConfig.CLIENT_ID_CONFIG, AppConfig.CLIENT_ID_CONFIG);
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, AppConfig.BOOTSTRAP_SERVERS_CONFIG);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, GsonSerializer.class.getName());
 

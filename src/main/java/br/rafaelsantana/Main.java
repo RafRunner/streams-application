@@ -22,14 +22,12 @@ public class Main {
              MyKafkaProducer<IPStack> producer = new MyKafkaProducer<>()) {
             consumer.subscribe((record) -> {
                 logger.info("Received record: " + record);
-                Long offSet = record.offset();
-
+                Long offset = record.offset();
                 IPStack inputStack = record.value();
                 if (inputStack == null) {
+                    logger.warning("Record with offset %s ignored because it's value couldn't be parsed".formatted(offset));
                     return;
                 }
-
-                logger.info("Record with offset %s value: %s".formatted(offSet, inputStack));
 
                 if (inputHistory.shouldSendOutputMessage(inputStack)) {
                     try {
@@ -39,7 +37,7 @@ public class Main {
                         producer.sendRecord(
                                 new ProducerRecord<>(AppConfig.OUTPUT_TOPIC, AppConfig.CLIENT_ID_CONFIG, inputStack));
 
-                        logger.info("Record with offset %s sent to output stream with value %s".formatted(offSet, inputStack));
+                        logger.info("Record with offset %s sent to output stream with value %s".formatted(offset, inputStack));
 
                         inputHistory.registerProcessedInput(inputStack);
                     } catch (InterruptedException | ExecutionException e) {
@@ -47,7 +45,7 @@ public class Main {
                     }
                 }
                 else {
-                    logger.info("Record with offset %s not sent to output because it wasn't needed".formatted(offSet));
+                    logger.info("Record with offset %s not sent to output because it wasn't needed".formatted(offset));
                 }
             });
         }
