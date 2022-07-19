@@ -5,7 +5,8 @@ plugins {
 group 'br.rafaelsantana'
 version '1.0-SNAPSHOT'
 
-task fatJar(type: Jar) {
+task fatJar(type: Jar, dependsOn: ['clean', 'build']) {
+    tasks.findByName('build').mustRunAfter 'clean'
     manifest {
         attributes 'Main-Class': 'br.rafaelsantana.Main'
     }

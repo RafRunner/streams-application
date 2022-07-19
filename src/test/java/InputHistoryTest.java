@@ -4,6 +4,8 @@ import br.rafaelsantana.model.IPStack;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
+
 public class InputHistoryTest {
 
     @Test
@@ -67,7 +69,7 @@ public class InputHistoryTest {
 
     private IPStack sampleIPStack1() {
         return new IPStack("client1",
-                1658096540L,
+                Instant.now().getEpochSecond(),
                 "127.0.0.1",
                 12f,
                 -10f,
@@ -78,7 +80,7 @@ public class InputHistoryTest {
 
     private IPStack sampleIPStack2() {
         return new IPStack("client2",
-                1658096540L,
+                Instant.now().getEpochSecond(),
                 "127.0.0.1",
                 12f,
                 -10f,
@@ -89,7 +91,7 @@ public class InputHistoryTest {
 
     private IPStack sampleIPStack3() {
         return new IPStack("client1",
-                1658096540L,
+                Instant.now().getEpochSecond(),
                 "208.80.154.224",
                 38.98372f,
                 -77.38276f,
