@@ -6,8 +6,11 @@ import com.google.gson.JsonSyntaxException;
 import org.apache.kafka.common.serialization.Deserializer;
 
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class GsonDeserializer<T> implements Deserializer<T> {
+
+    static final Logger logger = Logger.getLogger(GsonDeserializer.class.getName());
 
     public static final String CONFIG_VALUE_CLASS = "value.deserializer.class";
     public static final String CONFIG_KEY_CLASS = "key.deserializer.class";
@@ -23,8 +26,8 @@ public class GsonDeserializer<T> implements Deserializer<T> {
         try {
             cls = (Class<T>) Class.forName(clsName);
         } catch (ClassNotFoundException e) {
-            // TODO use logs
-            System.err.printf("Failed to configure GsonDeserializer. Did you forget to specify the '%s' property ?%n", configKey);
+            logger.severe(("Failed to configure GsonDeserializer." +
+                    "Did you forget to specify the '%s' property ?").formatted(configKey));
         }
     }
 
@@ -33,8 +36,7 @@ public class GsonDeserializer<T> implements Deserializer<T> {
         try {
             return gson.fromJson(new String(bytes), cls);
         } catch (JsonSyntaxException e) {
-            // TODO use logs
-            System.err.printf("Malformed record value: %s\nError: %s", new String(bytes), e);
+            logger.warning("Malformed record value: %s\nError: %s".formatted(new String(bytes), e));
             return null;
         }
     }

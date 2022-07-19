@@ -12,8 +12,11 @@ import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Logger;
 
 public class MyKafkaProducer<T> implements Closeable {
+
+    static final Logger logger = Logger.getLogger(MyKafkaProducer.class.getName());
 
     private final KafkaProducer<String, T> producer;
 
@@ -24,15 +27,14 @@ public class MyKafkaProducer<T> implements Closeable {
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, GsonSerializer.class.getName());
 
-       producer = new KafkaProducer<String, T>(props);
+       producer = new KafkaProducer<>(props);
     }
 
     public RecordMetadata sendRecord(ProducerRecord<String, T> record) {
         try {
             return producer.send(record).get(AppConfig.DEFAULT_TIMEOUT_KAFKA, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            // TODO use logs
-            System.err.printf("Error while sending record: %s", e);
+            logger.severe("Error while sending record: " + e);
             return null;
         }
     }

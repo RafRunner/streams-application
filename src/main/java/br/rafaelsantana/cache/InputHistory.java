@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+// TODO implement history on Redis so multiple instances can access it and it is persisted
 public class InputHistory {
 
     Map<String, Map<String, IPStack>> historyPerClient = new HashMap<>();

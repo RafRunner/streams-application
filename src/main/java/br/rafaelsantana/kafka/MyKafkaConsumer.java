@@ -29,7 +29,7 @@ public class MyKafkaConsumer<T> implements Closeable {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GsonDeserializer.class.getName());
         props.put(GsonDeserializer.CONFIG_VALUE_CLASS, valueClassName);
 
-        kafkaConsumer = new KafkaConsumer<String, T>(props);
+        kafkaConsumer = new KafkaConsumer<>(props);
         this.topic = topic;
     }
 
