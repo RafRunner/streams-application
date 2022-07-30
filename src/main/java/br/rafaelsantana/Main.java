@@ -1,11 +1,9 @@
 package br.rafaelsantana;
 
 import br.rafaelsantana.cache.InputHistory;
-import br.rafaelsantana.kafka.consumers.IncompleteIPStackConsumer;
-import br.rafaelsantana.kafka.producers.CompleteIPStackProducer;
+import br.rafaelsantana.kafka.streams.IPStackStream;
 import br.rafaelsantana.model.IPStack;
 import br.rafaelsantana.services.IPStackService;
-import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
@@ -14,40 +12,38 @@ public class Main {
 
     static final Logger logger = Logger.getLogger(Main.class.getName());
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         InputHistory inputHistory = new InputHistory();
         IPStackService.IPStackClient client = IPStackService.buildClient();
 
-        try (IncompleteIPStackConsumer<IPStack> consumer = new IncompleteIPStackConsumer<>(AppConfig.INPUT_TOPIC, IPStack.class.getName());
-             CompleteIPStackProducer<IPStack> producer = new CompleteIPStackProducer<>()) {
-            consumer.subscribe((record) -> {
-                logger.info("Received record: " + record);
-                Long offset = record.offset();
-                IPStack inputStack = record.value();
-                if (inputStack == null) {
-                    logger.warning("Record with offset %s ignored because it's value couldn't be parsed".formatted(offset));
-                    return;
+        IPStackStream ipStackStream = new IPStackStream(AppConfig.INPUT_TOPIC, AppConfig.OUTPUT_TOPIC, (ipStack) -> {
+            logger.info("Received record: " + ipStack);
+            if (ipStack == null) {
+                logger.warning("Record ignored because it's value couldn't be parsed");
+                return null;
+            }
+
+            if (inputHistory.shouldSendOutputMessage(ipStack)) {
+                try {
+                    IPStack response = client.getIpInformation(ipStack.ip).get();
+                    ipStack.completeWithApiResponse(response);
+
+                    logger.info("Record sent to output stream with value %s".formatted(ipStack));
+
+                    inputHistory.registerProcessedInput(ipStack);
+
+                    return ipStack;
+                } catch (InterruptedException | ExecutionException e) {
+                    logger.severe("Error while making request: %s\nError: %s".formatted(ipStack, e));
                 }
+            }
+            else {
+                logger.info("Record not sent to output because it wasn't needed");
+            }
 
-                if (inputHistory.shouldSendOutputMessage(inputStack)) {
-                    try {
-                        IPStack response = client.getIpInformation(inputStack.ip).get();
-                        inputStack.completeWithApiResponse(response);
+            return null;
+        });
 
-                        producer.sendRecord(
-                                new ProducerRecord<>(AppConfig.OUTPUT_TOPIC, AppConfig.CLIENT_ID_CONFIG, inputStack));
-
-                        logger.info("Record with offset %s sent to output stream with value %s".formatted(offset, inputStack));
-
-                        inputHistory.registerProcessedInput(inputStack);
-                    } catch (InterruptedException | ExecutionException e) {
-                        logger.severe("Error while making request: %s\nError: %s".formatted(inputStack, e));
-                    }
-                }
-                else {
-                    logger.info("Record with offset %s not sent to output because it wasn't needed".formatted(offset));
-                }
-            });
-        }
+        ipStackStream.getStreams().start();
     }
 }
