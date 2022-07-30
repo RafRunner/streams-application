@@ -1,8 +1,8 @@
 package br.rafaelsantana;
 
 import br.rafaelsantana.cache.InputHistory;
-import br.rafaelsantana.kafka.MyKafkaConsumer;
-import br.rafaelsantana.kafka.MyKafkaProducer;
+import br.rafaelsantana.kafka.consumers.IncompleteIPStackConsumer;
+import br.rafaelsantana.kafka.producers.CompleteIPStackProducer;
 import br.rafaelsantana.model.IPStack;
 import br.rafaelsantana.services.IPStackService;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -18,8 +18,8 @@ public class Main {
         InputHistory inputHistory = new InputHistory();
         IPStackService.IPStackClient client = IPStackService.buildClient();
 
-        try (MyKafkaConsumer<IPStack> consumer = new MyKafkaConsumer<>(AppConfig.INPUT_TOPIC, IPStack.class.getName());
-             MyKafkaProducer<IPStack> producer = new MyKafkaProducer<>()) {
+        try (IncompleteIPStackConsumer<IPStack> consumer = new IncompleteIPStackConsumer<>(AppConfig.INPUT_TOPIC, IPStack.class.getName());
+             CompleteIPStackProducer<IPStack> producer = new CompleteIPStackProducer<>()) {
             consumer.subscribe((record) -> {
                 logger.info("Received record: " + record);
                 Long offset = record.offset();

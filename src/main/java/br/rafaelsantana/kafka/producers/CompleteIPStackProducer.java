@@ -1,6 +1,7 @@
-package br.rafaelsantana.kafka;
+package br.rafaelsantana.kafka.producers;
 
 import br.rafaelsantana.AppConfig;
+import br.rafaelsantana.kafka.GsonSerializer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -14,13 +15,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
-public class MyKafkaProducer<T> implements Closeable {
+public class CompleteIPStackProducer<T> implements Closeable {
 
-    static final Logger logger = Logger.getLogger(MyKafkaProducer.class.getName());
+    static final Logger logger = Logger.getLogger(CompleteIPStackProducer.class.getName());
 
     private final KafkaProducer<String, T> producer;
 
-    public MyKafkaProducer() {
+    public CompleteIPStackProducer() {
         Properties props = new Properties();
         props.put(ProducerConfig.CLIENT_ID_CONFIG, AppConfig.CLIENT_ID_CONFIG);
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, AppConfig.BOOTSTRAP_SERVERS_CONFIG);

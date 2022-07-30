@@ -1,6 +1,7 @@
-package br.rafaelsantana.kafka;
+package br.rafaelsantana.kafka.consumers;
 
 import br.rafaelsantana.AppConfig;
+import br.rafaelsantana.kafka.GsonDeserializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -13,13 +14,13 @@ import java.util.List;
 import java.util.Properties;
 import java.util.function.Consumer;
 
-public class MyKafkaConsumer<T> implements Closeable {
+public class IncompleteIPStackConsumer<T> implements Closeable {
 
     private final KafkaConsumer<String, T> kafkaConsumer;
     private final String topic;
     private Boolean isListening = false;
 
-    public MyKafkaConsumer(String topic, String valueClassName) {
+    public IncompleteIPStackConsumer(String topic, String valueClassName) {
         Properties props = new Properties();
         props.put(ConsumerConfig.CLIENT_ID_CONFIG, AppConfig.CLIENT_ID_CONFIG);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, AppConfig.GROUP_ID_CONFIG);
