@@ -1,14 +1,20 @@
 package br.rafaelsantana.cache;
 
-import br.rafaelsantana.AppConfig;
+import br.rafaelsantana.Constants;
 import br.rafaelsantana.model.IPStack;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
 // TODO implement history on Redis so multiple instances can access it and it is persisted
+@Component
 public class InputHistory {
+
+    @Autowired
+    private Constants constants;
 
     Map<String, Map<String, IPStack>> historyPerClient = new HashMap<>();
 
@@ -19,7 +25,7 @@ public class InputHistory {
     public boolean shouldSendOutputMessage(IPStack ipStack) {
         IPStack lastRecord = getClientHistory(ipStack.clientId).get(ipStack.ip);
         return lastRecord == null ||
-                Instant.now().getEpochSecond() - lastRecord.timeStamp > AppConfig.DEFAULT_CACHE_MAX_AGE;
+                Instant.now().getEpochSecond() - lastRecord.timeStamp > constants.DEFAULT_CACHE_MAX_AGE;
     }
 
     private Map<String, IPStack> getClientHistory(String clientId) {

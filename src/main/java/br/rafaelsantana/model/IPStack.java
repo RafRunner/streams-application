@@ -23,14 +23,16 @@ public class IPStack {
     @SerializedName("city")
     public String city;
 
-    public IPStack(String clientId,
-                   Long timeStamp,
-                   String ip,
-                   Float latitude,
-                   Float longitude,
-                   String country,
-                   String region,
-                   String city) {
+    public IPStack(
+            String clientId,
+            Long timeStamp,
+            String ip,
+            Float latitude,
+            Float longitude,
+            String country,
+            String region,
+            String city
+    ) {
         this.clientId = clientId;
         this.timeStamp = timeStamp;
         this.ip = ip;

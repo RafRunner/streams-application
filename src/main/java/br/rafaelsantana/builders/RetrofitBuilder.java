@@ -1,6 +1,6 @@
 package br.rafaelsantana.builders;
 
-import br.rafaelsantana.AppConfig;
+import br.rafaelsantana.Constants;
 import okhttp3.*;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -12,19 +12,13 @@ import java.util.concurrent.TimeUnit;
 public class RetrofitBuilder {
 
     private final static String BASE_URL = "http://api.ipstack.com/";
-    private final static String API_KEY = AppConfig.API_KEY;
 
-    private static Retrofit instance;
-
-    public static Retrofit build() {
-        if (instance == null) {
-            instance = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .client(clientWithApiKeyAndHeaders())
-                    .build();
-        }
-        return instance;
+    public static Retrofit build(Constants constants) {
+        return new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(clientWithApiKeyAndHeaders(constants))
+                .build();
     }
 
     private static File getCacheFile() {
@@ -40,20 +34,20 @@ public class RetrofitBuilder {
         return file;
     }
 
-    private static OkHttpClient clientWithApiKeyAndHeaders() {
+    private static OkHttpClient clientWithApiKeyAndHeaders(Constants constants) {
         File httpCacheDirectory = getCacheFile();
-        int cacheSize = AppConfig.DEFAULT_CACHE_MAX_SIZE;
+        int cacheSize = constants.DEFAULT_CACHE_MAX_SIZE;
         Cache cache = new Cache(httpCacheDirectory, cacheSize);
 
         return new OkHttpClient.Builder()
-                .connectTimeout(AppConfig.DEFAULT_TIMEOUT_REQUESTS, TimeUnit.MILLISECONDS)
+                .connectTimeout(constants.DEFAULT_TIMEOUT_REQUESTS, TimeUnit.MILLISECONDS)
                 .addInterceptor(chain -> {
                     Request originalRequest = chain.request();
 
                     HttpUrl newUrl = originalRequest
                             .url()
                             .newBuilder()
-                            .addQueryParameter("access_key", API_KEY)
+                            .addQueryParameter("access_key", constants.API_KEY)
                             .build();
 
                     Headers newHeaders = originalRequest
@@ -74,7 +68,7 @@ public class RetrofitBuilder {
                     Response response = chain.proceed(chain.request());
 
                     CacheControl cacheControl = new CacheControl.Builder()
-                            .maxAge(AppConfig.DEFAULT_CACHE_MAX_AGE, TimeUnit.SECONDS)
+                            .maxAge(constants.DEFAULT_CACHE_MAX_AGE, TimeUnit.SECONDS)
                             .build();
 
                     return response.newBuilder()

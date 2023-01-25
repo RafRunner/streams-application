@@ -1,0 +1,13 @@
+api:
+  default-timeout-requests: 15000
+  default-cache-max-size: 10485760
+  default-cache-max-age: 1800
+
+kafka:
+  client-id-config: streams-application
+  group-id-config: "streams-application.group"
+  default-timeout-kafka: 15000
+  auto-offset-reset-config: earliest
+  bootstrap-servers-config: localhost:9092
+  input-topic: "ipstack.input"
+  output-topic: "ipstack.output"

@@ -1,4 +1,3 @@
-import br.rafaelsantana.AppConfig;
 import br.rafaelsantana.cache.InputHistory;
 import br.rafaelsantana.model.IPStack;
 import org.junit.jupiter.api.Assertions;
@@ -62,7 +61,7 @@ public class InputHistoryTest {
         Assertions.assertTrue(inputHistory.shouldSendOutputMessage(ipStack));
 
         inputHistory.registerProcessedInput(ipStack);
-        ipStack.timeStamp -= (AppConfig.DEFAULT_CACHE_MAX_AGE + 10);
+        ipStack.timeStamp -= (1800 + 10);
 
         Assertions.assertTrue(inputHistory.shouldSendOutputMessage(ipStack));
     }

@@ -1,59 +1,17 @@
 package br.rafaelsantana.kafka.consumers;
 
-import br.rafaelsantana.AppConfig;
-import br.rafaelsantana.kafka.GsonDeserializer;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.serialization.StringDeserializer;
+import br.rafaelsantana.model.IPStack;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Service;
 
-import java.io.Closeable;
-import java.time.Duration;
-import java.util.List;
-import java.util.Properties;
-import java.util.function.Consumer;
+import java.util.logging.Logger;
 
-public class IncompleteIPStackConsumer<T> implements Closeable {
+@Service
+public class IncompleteIPStackConsumer {
+    static final Logger logger = Logger.getLogger(IncompleteIPStackConsumer.class.getName());
 
-    private final KafkaConsumer<String, T> kafkaConsumer;
-    private final String topic;
-    private Boolean isListening = false;
-
-    public IncompleteIPStackConsumer(String topic, String valueClassName) {
-        Properties props = new Properties();
-        props.put(ConsumerConfig.CLIENT_ID_CONFIG, AppConfig.CLIENT_ID_CONFIG);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, AppConfig.GROUP_ID_CONFIG);
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, AppConfig.BOOTSTRAP_SERVERS_CONFIG);
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, AppConfig.AUTO_OFFSET_RESET_CONFIG);
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, GsonDeserializer.class.getName());
-        props.put(GsonDeserializer.CONFIG_VALUE_CLASS, valueClassName);
-
-        kafkaConsumer = new KafkaConsumer<>(props);
-        this.topic = topic;
-    }
-
-    public void subscribe(Consumer<ConsumerRecord<String, T>> consumer) {
-        kafkaConsumer.subscribe(List.of(topic));
-        isListening = true;
-
-        while (isListening) {
-            ConsumerRecords<String, T> records = kafkaConsumer.poll(Duration.ofMillis(AppConfig.DEFAULT_TIMEOUT_KAFKA));
-            for (ConsumerRecord<String, T> record : records) {
-                consumer.accept(record);
-            }
-        }
-    }
-
-    public void unsubscribe() {
-        kafkaConsumer.unsubscribe();
-        isListening = false;
-    }
-
-    @Override
-    public void close() {
-        unsubscribe();
-        kafkaConsumer.close();
+    @KafkaListener(topics = "${kafka.input-topic}", groupId = "${kafka.group-id-config}", containerFactory = "ipStackKafkaListenerContainerFactory")
+    public void listenForIPStacks(IPStack ipStack) {
+        logger.info("Record received by Consumer: " + ipStack);
     }
 }

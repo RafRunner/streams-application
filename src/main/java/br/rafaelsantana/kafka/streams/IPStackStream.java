@@ -1,50 +1,63 @@
 package br.rafaelsantana.kafka.streams;
 
-import br.rafaelsantana.AppConfig;
-import br.rafaelsantana.kafka.GsonIPStackSerdes;
+import br.rafaelsantana.Constants;
+import br.rafaelsantana.cache.InputHistory;
 import br.rafaelsantana.model.IPStack;
-import org.apache.kafka.common.serialization.Serdes;
+import br.rafaelsantana.services.IPStackService;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.KStream;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import java.io.Closeable;
-import java.util.Properties;
-import java.util.function.Function;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
-public class IPStackStream implements Closeable {
+@Component
+public class IPStackStream {
 
     static final Logger logger = Logger.getLogger(IPStackStream.class.getName());
 
-    private final KafkaStreams streams;
+    @Autowired
+    private InputHistory inputHistory;
 
-    public IPStackStream(final String inputTopic, final String outputTopic, Function<IPStack, IPStack> action) {
-        Properties props = new Properties();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, AppConfig.CLIENT_ID_CONFIG);
-        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, AppConfig.BOOTSTRAP_SERVERS_CONFIG);
-        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
-        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, GsonIPStackSerdes.class);
+    @Autowired
+    private IPStackService.IPStackClient client;
 
-        StreamsBuilder builder = new StreamsBuilder();
-        KStream<String, IPStack> source = builder.stream(inputTopic);
+    @Autowired
+    void buildPipeline(StreamsBuilder streamsBuilder, Constants constants) {
+        KStream<String, IPStack> source = streamsBuilder.stream(constants.INPUT_TOPIC);
 
         KStream<String, IPStack> processedStream = source
-                .mapValues(action::apply)
+                .mapValues(this::fillInformation)
                 .filter(((key, ipStack) -> ipStack != null));
 
-        processedStream.to(outputTopic);
-
-        Topology topology = builder.build();
-        logger.info("IPStack Topology created:\n" + topology.describe().toString());
-        streams = new KafkaStreams(topology, props);
+        processedStream.to(constants.OUTPUT_TOPIC);
     }
 
-    public KafkaStreams getStreams() {
-        return streams;
-    }
+    private IPStack fillInformation(IPStack inputStack) {
+        logger.info("Received record: " + inputStack);
+        if (inputStack == null) {
+            logger.warning("Record ignored because it's value couldn't be parsed");
+            return null;
+        }
 
-    @Override
-    public void close() {
-        streams.close();
+        if (inputHistory.shouldSendOutputMessage(inputStack)) {
+            try {
+                IPStack response = client.getIpInformation(inputStack.ip).get();
+                inputStack.completeWithApiResponse(response);
+
+                logger.info("Record sent to output stream with value %s".formatted(inputStack));
+
+                inputHistory.registerProcessedInput(inputStack);
+
+                return inputStack;
+            } catch (InterruptedException | ExecutionException e) {
+                logger.severe("Error while making request: %s\nError: %s".formatted(inputStack, e));
+            }
+        } else {
+            logger.info("Record not sent to output because it wasn't needed");
+        }
+
+        return null;
     }
 }

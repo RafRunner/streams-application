@@ -1,12 +1,15 @@
 package br.rafaelsantana.services;
 
-import br.rafaelsantana.builders.RetrofitBuilder;
 import br.rafaelsantana.model.IPStack;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
+import retrofit2.Retrofit;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 
 import java.util.concurrent.CompletableFuture;
 
+@Component
 public class IPStackService {
 
     public interface IPStackClient {
@@ -14,7 +17,8 @@ public class IPStackService {
         CompletableFuture<IPStack> getIpInformation(@Path("ip") String ip);
     }
 
-    public static IPStackClient buildClient() {
-        return RetrofitBuilder.build().create(IPStackClient.class);
+    @Bean
+    public static IPStackClient buildClient(Retrofit retrofit) {
+        return retrofit.create(IPStackClient.class);
     }
 }
