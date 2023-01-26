@@ -3,14 +3,10 @@ package br.rafaelsantana;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.logging.Logger;
-
 public class Constants {
 
-    static final Logger logger = Logger.getLogger(Constants.class.getName());
 
     public Constants(Dotenv env) {
-        logger.info("=================================================== Constants CREATED");
         this.API_KEY = env.get("API_KEY");
     }
 

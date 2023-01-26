@@ -45,7 +45,7 @@ public class AppConfig {
 
     @Bean
     Retrofit retrofit(Constants constants) {
-        return RetrofitBuilder.build(constants);
+        return RetrofitBuilder.build(constants, "http://api.ipstack.com/");
     }
 
     @Bean(name = KafkaStreamsDefaultConfiguration.DEFAULT_STREAMS_CONFIG_BEAN_NAME)

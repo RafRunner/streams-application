@@ -11,11 +11,9 @@ import java.util.concurrent.TimeUnit;
 
 public class RetrofitBuilder {
 
-    private final static String BASE_URL = "http://api.ipstack.com/";
-
-    public static Retrofit build(Constants constants) {
+    public static Retrofit build(Constants constants, String baseUrl) {
         return new Retrofit.Builder()
-                .baseUrl(BASE_URL)
+                .baseUrl(baseUrl)
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(clientWithApiKeyAndHeaders(constants))
                 .build();

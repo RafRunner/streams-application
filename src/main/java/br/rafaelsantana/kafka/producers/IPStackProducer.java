@@ -14,9 +14,9 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 @Component
-public class CompleteIPStackProducer {
+public class IPStackProducer {
 
-    static final Logger logger = Logger.getLogger(CompleteIPStackProducer.class.getName());
+    static final Logger logger = Logger.getLogger(IPStackProducer.class.getName());
 
     @Autowired
     private KafkaTemplate<String, IPStack> kafkaTemplate;
@@ -26,6 +26,7 @@ public class CompleteIPStackProducer {
 
     public SendResult<String, IPStack> sendIPStack(IPStack ipStack, String topicName) {
         try {
+            logger.info("Sendind IPStack: " + ipStack + " to topic: " + topicName);
             return kafkaTemplate.send(topicName, ipStack).get(constants.DEFAULT_TIMEOUT_KAFKA, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             logger.severe("Error while sending record: " + e);
