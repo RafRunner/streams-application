@@ -25,6 +25,7 @@ public class IPStackStream {
     private IPStackService.IPStackClient client;
 
     public static final String COMPLETE_IPSTACK_TABLE = "complete_ipstacks";
+    public static final String IPSTACK_BY_CLIENT_TABLE = "ipstacks_by_client";
 
     @Autowired
     void buildPipeline(StreamsBuilder streamsBuilder, Constants constants) {
@@ -38,6 +39,11 @@ public class IPStackStream {
                 .groupBy((key, ipStack) -> ipStack.ip)
                 .reduce((ipStack1, ipStack2) -> ipStack1.timeStamp > ipStack2.timeStamp ? ipStack1 : ipStack2,
                         Materialized.as(COMPLETE_IPSTACK_TABLE));
+
+        processedStream
+                .groupBy((key, ipStack) -> ipStack.clientId)
+                .reduce((ipStack1, ipStack2) -> ipStack1.timeStamp > ipStack2.timeStamp ? ipStack1 : ipStack2,
+                        Materialized.as(IPSTACK_BY_CLIENT_TABLE));
 
         processedStream.to(constants.OUTPUT_TOPIC);
     }
