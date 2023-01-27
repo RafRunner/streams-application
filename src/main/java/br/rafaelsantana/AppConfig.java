@@ -4,6 +4,7 @@ import br.rafaelsantana.builders.RetrofitBuilder;
 import br.rafaelsantana.kafka.GsonDeserializer;
 import br.rafaelsantana.kafka.GsonIPStackSerdes;
 import br.rafaelsantana.kafka.GsonSerializer;
+import br.rafaelsantana.kafka.streams.IPStackStream;
 import br.rafaelsantana.model.IPStack;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -36,11 +37,6 @@ public class AppConfig {
     @Bean
     Dotenv env() {
         return Dotenv.load();
-    }
-
-    @Bean
-    Constants constants(Dotenv env) {
-        return new Constants(env);
     }
 
     @Bean
@@ -98,9 +94,34 @@ public class AppConfig {
         return factory;
     }
 
+    // Declaring and creating Kafka Topics
     @Bean
     NewTopic inputTopic(@NotNull Constants constants) {
         return TopicBuilder.name(constants.INPUT_TOPIC)
+                .partitions(1)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
+    NewTopic outputTopic(@NotNull Constants constants) {
+        return TopicBuilder.name(constants.OUTPUT_TOPIC)
+                .partitions(1)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
+    NewTopic completeIPStackTableTopic() {
+        return TopicBuilder.name(IPStackStream.COMPLETE_IPSTACK_TABLE)
+                .partitions(1)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
+    NewTopic ipStackByClientIdTableTopic() {
+        return TopicBuilder.name(IPStackStream.IPSTACK_BY_CLIENT_TABLE)
                 .partitions(1)
                 .replicas(1)
                 .build();

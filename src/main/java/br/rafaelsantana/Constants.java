@@ -2,12 +2,17 @@ package br.rafaelsantana;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class Constants {
 
-
-    public Constants(Dotenv env) {
+    public Constants(
+        Dotenv env,
+        @Value(value = "${kafka.bootstrap-servers-config}") String bootstrapServersConfig
+    ) {
         this.API_KEY = env.get("API_KEY");
+        this.BOOTSTRAP_SERVERS_CONFIG = env.get("BOOTSTRAP_SERVERS_CONFIG", bootstrapServersConfig);
     }
 
     // Sensitive data that comes from a .env file
@@ -30,8 +35,8 @@ public class Constants {
     public Integer DEFAULT_TIMEOUT_KAFKA;
     @Value(value = "${kafka.auto-offset-reset-config}")
     public String AUTO_OFFSET_RESET_CONFIG;
-    @Value(value = "${kafka.bootstrap-servers-config}")
-    public String BOOTSTRAP_SERVERS_CONFIG;
+
+    public final String BOOTSTRAP_SERVERS_CONFIG;
     @Value(value = "${kafka.input-topic}")
     public String INPUT_TOPIC;
     @Value(value = "${kafka.output-topic}")

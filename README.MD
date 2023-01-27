@@ -25,7 +25,7 @@ The geolocation information is gathered using the [IPStack](https://ipstack.com/
 
 ## How to run
 
-- Create a .env and a docker.env (if you intend on running the main application on docker) on the project root files with the necessary configuration (the only ones with no default and needs to be present are `API_KEY` with your IPStack API key on both files and `BOOTSTRAP_SERVERS_CONFIG=//kafka:9092` on the docker.env file so the application can communicate with the kafka container when running with docker);
+- Create a .env and a docker.env (if you intend on running the main application on docker) files on the project root with the necessary configuration (`API_KEY` with your IPStack API key on both files and `BOOTSTRAP_SERVERS_CONFIG=//kafka:9092` on the docker.env file so the application can communicate with the kafka container when running with docker);
 
 
 - Build the application running the gradle task `fatJar` with `./gradlew fatJar` on Linux/macOS or `gradlew fatJar` on Windows with jdk17+;
@@ -48,6 +48,16 @@ You can then send a message from the producer:
     {"client_id":"id teste","time_stamp":748271372,"ip":"208.80.154.224"}
 
 The IP above is one of Wikipedia's public IPs.
+
+Or you can also make a post request to `localhost:8081/ipstack/send` with a json body like:
+
+    {
+        "clientId": <string>,
+        "timeStamp": <long>,
+        "ip": <string>
+    }
+
+To send this on the input topic. The complete stack will not be sent as a response, but you can get the most recently produced complete record for any IP by making get request to `localhost:8081/ipstack/get/<IP>`. You can also get the most recently produced record by the client id with a get request to `localhost:8081/ipstack/getByClient/<clientId>`.
 
 Note: the application won't respond to the same client with the same ip for 30 minutes, this is configurable in the .env files with the key DEFAULT_CACHE_MAX_AGE and the value in seconds.
 

@@ -33,6 +33,8 @@ services:
 
   stream-application:
     build: .
+    ports:
+      - "8081:8081"
     networks:
       - kafka-network
     depends_on:
