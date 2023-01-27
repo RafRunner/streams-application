@@ -6,6 +6,7 @@ import br.rafaelsantana.model.IPStack;
 import br.rafaelsantana.services.IPStackService;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.Materialized;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +24,8 @@ public class IPStackStream {
     @Autowired
     private IPStackService.IPStackClient client;
 
+    public static final String COMPLETE_IPSTACK_TABLE = "complete_ipstacks";
+
     @Autowired
     void buildPipeline(StreamsBuilder streamsBuilder, Constants constants) {
         KStream<String, IPStack> source = streamsBuilder.stream(constants.INPUT_TOPIC);
@@ -30,6 +33,11 @@ public class IPStackStream {
         KStream<String, IPStack> processedStream = source
                 .mapValues(this::fillInformation)
                 .filter(((key, ipStack) -> ipStack != null));
+
+        processedStream
+                .groupBy((key, ipStack) -> ipStack.ip)
+                .reduce((ipStack1, ipStack2) -> ipStack1.timeStamp > ipStack2.timeStamp ? ipStack1 : ipStack2,
+                        Materialized.as(COMPLETE_IPSTACK_TABLE));
 
         processedStream.to(constants.OUTPUT_TOPIC);
     }

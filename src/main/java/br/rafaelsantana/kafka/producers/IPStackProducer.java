@@ -26,7 +26,7 @@ public class IPStackProducer {
 
     public SendResult<String, IPStack> sendIPStack(IPStack ipStack, String topicName) {
         try {
-            logger.info("Sendind IPStack: " + ipStack + " to topic: " + topicName);
+            logger.info("Sending IPStack: " + ipStack + " to topic: " + topicName);
             return kafkaTemplate.send(topicName, ipStack).get(constants.DEFAULT_TIMEOUT_KAFKA, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             logger.severe("Error while sending record: " + e);

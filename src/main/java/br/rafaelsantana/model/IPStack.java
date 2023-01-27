@@ -51,6 +51,10 @@ public class IPStack {
        this(clientId, timeStamp, ip, null, null, null, null, null);
     }
 
+    public IPStack() {
+        this(null, null, null);
+    }
+
     public void completeWithApiResponse(IPStack apiResponse) {
         this.latitude = apiResponse.latitude;
         this.longitude = apiResponse.longitude;
