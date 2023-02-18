@@ -18,11 +18,18 @@ public class IPStackStream {
 
     static final Logger logger = Logger.getLogger(IPStackStream.class.getName());
 
-    @Autowired
-    private InputHistory inputHistory;
+    private final InputHistory inputHistory;
+
+    private final IPStackService.IPStackClient client;
 
     @Autowired
-    private IPStackService.IPStackClient client;
+    public IPStackStream(
+            InputHistory inputHistory,
+            IPStackService.IPStackClient client
+    ) {
+        this.inputHistory = inputHistory;
+        this.client = client;
+    }
 
     public static final String COMPLETE_IPSTACK_TABLE = "complete_ipstacks";
     public static final String IPSTACK_BY_CLIENT_TABLE = "ipstacks_by_client";

@@ -1,12 +1,14 @@
 package br.rafaelsantana;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class Constants {
 
+    @Autowired
     public Constants(
         Dotenv env,
         @Value(value = "${kafka.bootstrap-servers-config}") String bootstrapServersConfig

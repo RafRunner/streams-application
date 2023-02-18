@@ -16,14 +16,22 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/ipstack")
 public class IPStackController {
 
-    @Autowired
-    private StreamsBuilderFactoryBean factoryBean;
+    private final StreamsBuilderFactoryBean factoryBean;
+
+    private final IPStackProducer ipStackProducer;
+
+    private final Constants constants;
 
     @Autowired
-    private IPStackProducer ipStackProducer;
-
-    @Autowired
-    private Constants constants;
+    public IPStackController(
+            StreamsBuilderFactoryBean factoryBean,
+            IPStackProducer ipStackProducer,
+            Constants constants
+    ) {
+        this.factoryBean = factoryBean;
+        this.ipStackProducer = ipStackProducer;
+        this.constants = constants;
+    }
 
     @GetMapping("/get/{ip}")
     public IPStack getMostRecentCompleteStack(@PathVariable String ip) {

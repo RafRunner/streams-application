@@ -18,11 +18,18 @@ public class IPStackProducer {
 
     static final Logger logger = Logger.getLogger(IPStackProducer.class.getName());
 
-    @Autowired
-    private KafkaTemplate<String, IPStack> kafkaTemplate;
+    private final KafkaTemplate<String, IPStack> kafkaTemplate;
+
+    private final Constants constants;
 
     @Autowired
-    private Constants constants;
+    public IPStackProducer(
+            KafkaTemplate<String, IPStack> kafkaTemplate,
+            Constants constants
+    ) {
+        this.kafkaTemplate = kafkaTemplate;
+        this.constants = constants;
+    }
 
     public SendResult<String, IPStack> sendIPStack(IPStack ipStack, String topicName) {
         try {
