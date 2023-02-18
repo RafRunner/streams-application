@@ -13,8 +13,12 @@ import java.util.Map;
 @Component
 public class InputHistory {
 
+    private final Constants constants;
+
     @Autowired
-    private Constants constants;
+    public InputHistory(Constants constants) {
+        this.constants = constants;
+    }
 
     Map<String, Map<String, IPStack>> historyPerClient = new HashMap<>();
 
