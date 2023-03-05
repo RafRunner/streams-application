@@ -1,24 +1,48 @@
 package br.rafaelsantana.services;
 
+import br.rafaelsantana.kafka.streams.IPStackStream;
 import br.rafaelsantana.model.IPStack;
-import org.springframework.context.annotation.Bean;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.StoreQueryParameters;
+import org.apache.kafka.streams.state.QueryableStoreTypes;
+import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 import org.springframework.stereotype.Component;
-import retrofit2.Retrofit;
-import retrofit2.http.GET;
-import retrofit2.http.Path;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.Optional;
 
 @Component
 public class IPStackService {
 
-    public interface IPStackClient {
-        @GET("/{ip}")
-        CompletableFuture<IPStack> getIpInformation(@Path("ip") String ip);
+    private final StreamsBuilderFactoryBean factoryBean;
+
+    @Autowired
+    IPStackService(StreamsBuilderFactoryBean factoryBean) {
+        this.factoryBean = factoryBean;
     }
 
-    @Bean
-    public static IPStackClient buildClient(Retrofit retrofit) {
-        return retrofit.create(IPStackClient.class);
+    public Optional<IPStack> getMostRecentCompleteStack(String ip) {
+        return getReadOnlyKeyValueStore(IPStackStream.COMPLETE_IPSTACK_TABLE)
+                .map(store -> store.get(ip));
+    }
+
+    public Optional<IPStack> getMostRecentStackByClient(String clientId) {
+        return getReadOnlyKeyValueStore(IPStackStream.IPSTACK_BY_CLIENT_TABLE)
+                .map(store -> store.get(clientId));
+    }
+
+    private Optional<ReadOnlyKeyValueStore<String, IPStack>> getReadOnlyKeyValueStore(String tableName) {
+        KafkaStreams kafkaStreams = factoryBean.getKafkaStreams();
+        if (kafkaStreams == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(
+                kafkaStreams.store(
+                        StoreQueryParameters.fromNameAndType(
+                                tableName,
+                                QueryableStoreTypes.keyValueStore())
+                )
+        );
     }
 }

@@ -11,12 +11,12 @@ import java.util.Map;
 
 // TODO implement history on Redis so multiple instances can access it and it is persisted
 @Component
-public class InputHistory {
+public class OutputDecider {
 
     private final Constants constants;
 
     @Autowired
-    public InputHistory(Constants constants) {
+    public OutputDecider(Constants constants) {
         this.constants = constants;
     }
 

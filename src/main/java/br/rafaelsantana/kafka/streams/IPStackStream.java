@@ -1,10 +1,10 @@
 package br.rafaelsantana.kafka.streams;
 
 import br.rafaelsantana.Constants;
-import br.rafaelsantana.cache.InputHistory;
+import br.rafaelsantana.builders.clients.IPStackClient;
+import br.rafaelsantana.cache.OutputDecider;
 import br.rafaelsantana.model.IPStack;
-import br.rafaelsantana.services.IPStackService;
-import org.apache.kafka.streams.*;
+import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +18,16 @@ public class IPStackStream {
 
     static final Logger logger = Logger.getLogger(IPStackStream.class.getName());
 
-    private final InputHistory inputHistory;
+    private final OutputDecider outputDecider;
 
-    private final IPStackService.IPStackClient client;
+    private final IPStackClient client;
 
     @Autowired
     public IPStackStream(
-            InputHistory inputHistory,
-            IPStackService.IPStackClient client
+            OutputDecider outputDecider,
+            IPStackClient client
     ) {
-        this.inputHistory = inputHistory;
+        this.outputDecider = outputDecider;
         this.client = client;
     }
 
@@ -62,14 +62,14 @@ public class IPStackStream {
             return null;
         }
 
-        if (inputHistory.shouldSendOutputMessage(inputStack)) {
+        if (outputDecider.shouldSendOutputMessage(inputStack)) {
             try {
                 IPStack response = client.getIpInformation(inputStack.ip).get();
                 inputStack.completeWithApiResponse(response);
 
                 logger.info("Record sent to output stream with value %s".formatted(inputStack));
 
-                inputHistory.registerProcessedInput(inputStack);
+                outputDecider.registerProcessedInput(inputStack);
 
                 return inputStack;
             } catch (InterruptedException | ExecutionException e) {
