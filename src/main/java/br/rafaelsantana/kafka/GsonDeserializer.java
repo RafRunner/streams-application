@@ -25,9 +25,9 @@ public class GsonDeserializer<T> implements Deserializer<T> {
 
         try {
             cls = (Class<T>) Class.forName(clsName);
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException | NullPointerException e) {
             logger.severe(("Failed to configure GsonDeserializer." +
-                    "Did you forget to specify the '%s' property ?").formatted(configKey));
+                    "Did you forget to specify the '%s' property?").formatted(configKey));
         }
     }
 

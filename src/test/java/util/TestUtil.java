@@ -15,6 +15,7 @@ public class TestUtil {
         constants.OUTPUT_TOPIC = "output-topic";
         constants.INPUT_TOPIC = "input-topic";
         constants.CLIENT_ID_CONFIG = "streams-application-test";
+        constants.DEFAULT_CACHE_MAX_AGE = 1800;
 
         return constants;
     }
