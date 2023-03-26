@@ -33,7 +33,7 @@ public class TestUtil {
         return new IPStack(ipStack.clientId, ipStack.timeStamp, ipStack.ip);
     }
 
-    private static IPStack sampleIPStack1() {
+    public static IPStack sampleIPStack1() {
         return new IPStack("client1",
                 Instant.now().getEpochSecond(),
                 "127.0.0.1",
@@ -44,7 +44,7 @@ public class TestUtil {
                 "Goiânia");
     }
 
-    private static IPStack sampleIPStack2() {
+    public static IPStack sampleIPStack2() {
         return new IPStack("client2",
                 Instant.now().getEpochSecond(),
                 "127.0.0.1",
@@ -55,7 +55,7 @@ public class TestUtil {
                 "Goiânia");
     }
 
-    private static IPStack sampleIPStack3() {
+    public static IPStack sampleIPStack3() {
         return new IPStack("client1",
                 Instant.now().getEpochSecond(),
                 "208.80.154.224",

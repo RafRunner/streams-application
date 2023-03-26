@@ -82,6 +82,17 @@ public class IPStackStreamTest {
                     outputTopic.readValuesToList().toArray(new IPStack[0])
             );
             verify(ipStackClient, times(incompleteToCompleteStacks.size())).getIpInformation(anyString());
+            verify(ipStackClient, times(2)).getIpInformation(TestUtil.sampleIPStack1().ip);
+            verify(ipStackClient, times(1)).getIpInformation(TestUtil.sampleIPStack3().ip);
+
+            // when:
+            inputTopic.pipeInput(TestUtil.sampleIPStack3());
+            inputTopic.pipeInput(TestUtil.sampleIPStack2());
+
+            // then:
+            assertEquals(0, outputTopic.readValuesToList().size());
+            verify(ipStackClient, times(2)).getIpInformation(TestUtil.sampleIPStack2().ip);
+            verify(ipStackClient, times(1)).getIpInformation(TestUtil.sampleIPStack3().ip);
         }
     }
 }
