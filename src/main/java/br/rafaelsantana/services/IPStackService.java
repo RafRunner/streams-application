@@ -23,26 +23,20 @@ public class IPStackService {
     }
 
     public Optional<IPStack> getMostRecentCompleteStack(String ip) {
-        return getReadOnlyKeyValueStore(IPStackStream.COMPLETE_IPSTACK_TABLE)
-                .map(store -> store.get(ip));
+        return Optional.ofNullable(getReadOnlyKeyValueStore(IPStackStream.COMPLETE_IPSTACK_TABLE).get(ip));
     }
 
     public Optional<IPStack> getMostRecentStackByClient(String clientId) {
-        return getReadOnlyKeyValueStore(IPStackStream.IPSTACK_BY_CLIENT_TABLE)
-                .map(store -> store.get(clientId));
+        return Optional.ofNullable(getReadOnlyKeyValueStore(IPStackStream.IPSTACK_BY_CLIENT_TABLE).get(clientId));
     }
 
-    private Optional<ReadOnlyKeyValueStore<String, IPStack>> getReadOnlyKeyValueStore(String tableName) {
+    private ReadOnlyKeyValueStore<String, IPStack> getReadOnlyKeyValueStore(String tableName) {
         KafkaStreams kafkaStreams = factoryBean.getKafkaStreams();
         if (kafkaStreams == null) {
-            return Optional.empty();
+            throw new RuntimeException("Kafka streams have not been started yet!");
         }
-        return Optional.ofNullable(
-                kafkaStreams.store(
-                        StoreQueryParameters.fromNameAndType(
-                                tableName,
-                                QueryableStoreTypes.keyValueStore())
-                )
+        return kafkaStreams.store(
+                StoreQueryParameters.fromNameAndType(tableName, QueryableStoreTypes.keyValueStore())
         );
     }
 }

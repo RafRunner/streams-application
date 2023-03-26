@@ -14,4 +14,3 @@ kafka:
 
 server:
   port: 8081
-
