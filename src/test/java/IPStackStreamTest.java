@@ -10,17 +10,21 @@ import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.*;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import util.TestUtil;
 
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+@ExtendWith(MockitoExtension.class)
 public class IPStackStreamTest {
 
     @Mock
@@ -36,8 +40,6 @@ public class IPStackStreamTest {
     void setup() {
         var outputDecider = new OutputDecider(constants);
         var builder = new StreamsBuilder();
-
-        ipStackClient = Mockito.mock(IPStackClient.class);
 
         ipStackStream = new IPStackStream(outputDecider, ipStackClient);
         ipStackStream.buildPipeline(builder, constants);
@@ -55,10 +57,10 @@ public class IPStackStreamTest {
 
     @Test
     void ipStacksHaveTheirInformationCompletedByStream() {
+        // given:
         var incompleteToCompleteStacks = TestUtil.getIncompleteToCompleteIpStacks();
-
         for (var entry : incompleteToCompleteStacks.entrySet()) {
-            Mockito.when(ipStackClient.getIpInformation(entry.getKey().ip))
+            when(ipStackClient.getIpInformation(entry.getKey().ip))
                     .thenReturn(CompletableFuture.completedFuture(entry.getValue()));
         }
 
@@ -69,15 +71,17 @@ public class IPStackStreamTest {
             TestOutputTopic<String, IPStack> outputTopic = topologyTestDriver
                     .createOutputTopic(constants.OUTPUT_TOPIC, new StringDeserializer(), gsonDeserializer);
 
+            // when:
             for (var entry : incompleteToCompleteStacks.entrySet()) {
                 inputTopic.pipeInput(entry.getKey());
             }
 
-            Assertions.assertArrayEquals(
-                    incompleteToCompleteStacks.values().toArray(), outputTopic.readValuesToList().toArray(new IPStack[0])
+            // then:
+            assertArrayEquals(
+                    incompleteToCompleteStacks.values().toArray(),
+                    outputTopic.readValuesToList().toArray(new IPStack[0])
             );
-            var invocations = Mockito.mockingDetails(ipStackClient).getInvocations();
-            Assertions.assertEquals(incompleteToCompleteStacks.size(), invocations.size());
+            verify(ipStackClient, times(incompleteToCompleteStacks.size())).getIpInformation(anyString());
         }
     }
 }
