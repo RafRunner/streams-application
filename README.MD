@@ -40,12 +40,16 @@ Now you can send messages to the input topic from a different producer and consu
 
 One way to send and receive messages from the kafka topic is by using programs present on the kafka container on `/opt/bitnami/kafka/bin`:
 
-    kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic ipstack.output
-    kafka-console-producer.sh --bootstrap-server localhost:9092 --topic ipstack.input
+```bash
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic ipstack.output
+kafka-console-producer.sh --bootstrap-server localhost:9092 --topic ipstack.input
+```
 
 You can then send a message from the producer:
 
-    {"client_id":"id teste","time_stamp":748271372,"ip":"208.80.154.224"}
+```json
+{"client_id":"id teste","time_stamp":748271372,"ip":"208.80.154.224"}
+```
 
 The IP above is one of Wikipedia's public IPs.
 
