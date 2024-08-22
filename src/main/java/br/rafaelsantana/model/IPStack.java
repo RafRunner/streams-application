@@ -3,6 +3,7 @@ package br.rafaelsantana.model;
 import com.google.gson.annotations.SerializedName;
 
 import java.time.Instant;
+import java.util.Objects;
 
 public class IPStack {
 
@@ -62,6 +63,25 @@ public class IPStack {
         this.region = apiResponse.region;
         this.city = apiResponse.city;
         this.timeStamp = Instant.now().getEpochSecond();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IPStack ipStack = (IPStack) o;
+        return Objects.equals(clientId, ipStack.clientId)
+                && Objects.equals(ip, ipStack.ip)
+                && Objects.equals(latitude, ipStack.latitude)
+                && Objects.equals(longitude, ipStack.longitude)
+                && Objects.equals(country, ipStack.country)
+                && Objects.equals(region, ipStack.region)
+                && Objects.equals(city, ipStack.city);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(clientId, ip, latitude, longitude, country, region, city);
     }
 
     @Override

@@ -35,7 +35,7 @@ public class IPStackStream {
     public static final String IPSTACK_BY_CLIENT_TABLE = "ipstacks_by_client";
 
     @Autowired
-    void buildPipeline(StreamsBuilder streamsBuilder, Constants constants) {
+    public void buildPipeline(StreamsBuilder streamsBuilder, Constants constants) {
         KStream<String, IPStack> source = streamsBuilder.stream(constants.INPUT_TOPIC);
 
         KStream<String, IPStack> processedStream = source
